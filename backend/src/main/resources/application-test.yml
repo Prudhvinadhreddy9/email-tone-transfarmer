@@ -1,0 +1,15 @@
+# Test profile.
+#
+# Integration tests use a @TestConfiguration with a @Primary stub ChatModel,
+# so the OpenAI auto-config never actually contacts the API. We still need
+# a non-empty api-key so the auto-config bean creation succeeds.
+
+spring:
+  ai:
+    openai:
+      api-key: test-dummy-key-not-real
+
+logging:
+  level:
+    org.springframework.ai: INFO
+    com.learning.emailtone: DEBUG

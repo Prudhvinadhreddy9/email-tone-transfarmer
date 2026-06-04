@@ -1,0 +1,46 @@
+# =========================================================================
+#  email-tone-transformer / backend — main application configuration
+# =========================================================================
+
+spring:
+  application:
+    name: email-tone-transformer
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      chat:
+        options:
+          # gpt-4o-mini: cheap, fast, plenty smart for tone-shifting prose.
+          # ~$0.0003 per typical request — see TokenCostCalculator.
+          model: gpt-4o-mini
+          # WHY 0.7: this is a *creative rewriting* task. Slightly higher
+          # temperature gives the model room to phrase things in interesting
+          # ways. Compare to a scoring/judging task (resume screener) which
+          # uses 0.2 for reproducibility. See AiConfig javadoc for the full
+          # rationale.
+          temperature: 0.7
+          # 1000 is more than enough — we're rewriting one email, not generating
+          # essays. A hard cap protects you from runaway responses (a buggy
+          # prompt can cause the model to keep going forever).
+          max-tokens: 1000
+
+server:
+  port: 8080
+
+# Where the React dev server runs by default.
+email-tone:
+  cors:
+    allowed-origins: "http://localhost:5173"
+  pricing:
+    # USD per 1M tokens, gpt-4o-mini, source: https://openai.com/api/pricing/
+    # (as of 2026-01). Keep in sync with TokenCostCalculator constants.
+    input-per-1m: 0.15
+    output-per-1m: 0.60
+
+logging:
+  level:
+    # NOTE: DEBUG on Spring AI logs prompts and responses. Useful for learning,
+    # but turn DOWN in production — you'll log user emails, which is sensitive.
+    org.springframework.ai: DEBUG
+    com.learning.emailtone: DEBUG
